@@ -1,9 +1,9 @@
-import torch
 import torch.nn as nn
 
-class TrafficSignClassifierLinearModel(nn.Module):
+
+class TrafficSignClassifierLinearNN(nn.Module):
     def __init__(self, img_channel=3, img_size=32, num_classes=43):
-        super(TrafficSignClassifierLinearModel, self).__init__()
+        super(TrafficSignClassifierLinearNN, self).__init__()
         input_dim = img_size * img_size * img_channel
         self.layers = nn.Sequential(
             nn.Flatten(),
@@ -12,7 +12,7 @@ class TrafficSignClassifierLinearModel(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(64, num_classes)
+            nn.Linear(64, num_classes),
         )
 
     def forward(self, x):
