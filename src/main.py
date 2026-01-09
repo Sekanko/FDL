@@ -4,6 +4,7 @@ from data.gtsrb_dataset import ensure_data
 from data.SignDataset import create_dataloaders
 from models.linear_model import TrafficSignClassifierLinearModel
 from models.convolutional_model import TrafficSignClassifierConvolutionalModel
+from models.resnet_model import get_resnet_model
 # Póki co main do testów czy wszytsko działa poprawnie
 
 #torch.cuda.is_available = lambda: False
@@ -17,13 +18,14 @@ if __name__ == "__main__":
     print(f"Dane walidacyjne: {len(val_df)} próbek\n")
 
     print("Tworzenie dataloaderów...")
-    train_loader = create_dataloaders(train_df, batch_size=32)
-    val_loader = create_dataloaders(val_df, batch_size=32)
+    train_loader = create_dataloaders(train_df, batch_size=32, size=(224,224))
+    val_loader = create_dataloaders(val_df, batch_size=32, size=(224,224))
     print(f"Ilość batchy treningowych: {len(train_loader)}\n")
     
     print("Inicjalizacja modelu liniowego...")
     # model = TrafficSignClassifierLinearModel()
-    model = TrafficSignClassifierConvolutionalModel()
+    # model = TrafficSignClassifierConvolutionalModel()
+    model = get_resnet_model()
     print(f"Model:\n{model}\n")
     
     criterion = torch.nn.CrossEntropyLoss()
