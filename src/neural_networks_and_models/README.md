@@ -1,12 +1,7 @@
 # Informacje o sieciach
+Wszystkie sieci dotyczą problemu wykrywania i rozpoznawania znaków drogowych. Postanowiliśmy zastosować podejście dwuetapowe, aby móc oddzielnie zmieniać parametry sieci neuronowych w celu optymalizacji pod konkretne zadanie, dlatego docelowo chcemy mieć oddzielne **klasyfikację** i **wykrywanie**.
 
-Docelowo chcemy mieć modele do dwóch celów:
-- Klasyfikacji znaków drogowych
-- Wykrywaniu na zdjęciach znaków drogowych
-
-Do każdego z nich chcemy mieć po 3 wersje:
-- Naszą liniową
-- Naszą konwolucyjną
-- Istniejącą dowolną inną niż powyższe
-
-Nasze sieci mają oddzielne implemntacje dla klasyfikacji i wykrywania, aby móc oddzielnie zmieniać ich parametry w celu optymalizacji pod konkretne zadanie (podejście dwuetapowe).
+Do każdego z tych celów chcemy mieć po trzy modele:
+- Nasz liniowy
+- Nasz konwolucyjną
+- Dowolny istniejący, inny niż powyższe
