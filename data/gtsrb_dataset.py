@@ -1,6 +1,5 @@
 import os
 import kagglehub
-import shutil
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -30,7 +29,6 @@ def load_csv_files(dataset_dir):
 
 def convert_df_img_paths_to_absolute_paths(dataset_path, df):
     """ Funkcja pomocnicza, zamienia sciezki do obrazow na sciezki bezwzgledne.
-        Zapewnia
     """
 
     df['Path'] = df['Path'].apply(
@@ -48,7 +46,8 @@ def ensure_data():
         
 def main():
     train, val, test, meta = ensure_data()
-    print(train)
+    print(train.head(5))
+    
 
 if __name__=="__main__":
     main()
