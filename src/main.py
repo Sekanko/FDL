@@ -7,8 +7,6 @@ from neural_networks_and_models.classifier_linear_nn import (
 )
 from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierConvNN
 from neural_networks_and_models.resnet_model import get_resnet_model
-from neural_networks_and_models.detector_conv_nn import TrafficSignDetectorConvNN
-from neural_networks_and_models.detector_linear_nn import TrafficSignDetectorLinearNN
 from train_and_evaluate.evaluate_model import evaluate_model
 from torch.nn import CrossEntropyLoss
 
@@ -56,58 +54,14 @@ def test_classification_model(train_df, val_df, test_df, meta_df):
     )
 
 
-def test_detection_model(train_df, val_df, test_df, meta_df):
-    print("Tworzenie dataloaderów dla detekcji...")
-
-    train_loader = create_dataloaders(
-        train_df, batch_size=32, size=(224, 224), mode="detection"
-    )
-    val_loader = create_dataloaders(
-        val_df, batch_size=32, size=(224, 224), mode="detection"
-    )
-
-    print(f"Ilość batchy treningowych: {len(train_loader)}\n")
-
-    print("Inicjalizacja modelu detektora...")
-
-    model = TrafficSignDetectorConvNN()
-    # model = TrafficSignDetectorLinearNN()
-
-    print(f"Model detektora:\n{model}\n")
-
-    criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-    print("Rozpoczęcie trenowania detektora...")
-
-    trained_detector = train_model(
-        model=model,
-        dataloader=train_loader,
-        val_loader=val_loader,
-        criterion=criterion,
-        optimizer=optimizer,
-        num_epochs=5,
-        is_classification=False,
-    )
-
-
 def main():
     print("=== Pobieranie danych ===")
     train_df, val_df, test_df, meta_df = ensure_data()
     print(f"Dane treningowe: {len(train_df)} próbek")
     print(f"Dane walidacyjne: {len(val_df)} próbek\n")
 
-    test_loader = create_dataloaders(
-        test_df, batch_size=32, size=(224, 224), mode="detection"
-    )
-    # print("=== klasyfikacja ===")
-    # test_classification_model(train_df, val_df, test_df, meta_df)
-
-    print("\n=== detekcja ===")
-    trained_detector = test_detection_model(train_df, val_df, test_df, meta_df)
-    evaluate_model(
-        trained_detector, test_loader, torch.nn.MSELoss, is_classification=False
-    )
+    print("=== klasyfikacja ===")
+    test_classification_model(train_df, val_df, test_df, meta_df)
 
 
 if __name__ == "__main__":
