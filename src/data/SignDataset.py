@@ -39,7 +39,9 @@ class SignDataset(Dataset):
             return image_tensor, target
 
         elif self.mode == "classification":
-            image = image.crop((x1, y1, x2, y2))
+            if x1 != -1:
+                image = image.crop((x1, y1, x2, y2))
+   
             image_tensor = self.image_transform(image)
             label = self.labels[idx]
 
@@ -53,3 +55,4 @@ def create_dataloaders(data, batch_size=32, size=(32,32), mode="classification")
     dataset = SignDataset(data, size, mode)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return loader
+
