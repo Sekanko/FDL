@@ -42,7 +42,6 @@ def test_classification_model(train_df, val_df, test_df, meta_df):
         criterion=criterion,
         optimizer=optimizer,
         num_epochs=3,
-        is_classification=True,
     )
 
     test_loader = create_dataloaders(test_df, batch_size=32, size=(32, 32))
@@ -50,7 +49,6 @@ def test_classification_model(train_df, val_df, test_df, meta_df):
         model=trained_model,
         test_loader=test_loader,
         criterion=criterion,
-        is_classification=True,
     )
 
 
