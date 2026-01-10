@@ -1,3 +1,6 @@
+import os
+from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
+from neural_networks_and_models.yolo_model import load_yolo_model
 import torch
 from train_and_evaluate.train_model import train_model
 from data.gtsrb_dataset import ensure_data
@@ -15,21 +18,20 @@ import os
 
 # Póki co main do testów czy wszytsko działa poprawnie
 
-#torch.cuda.is_available = lambda: False
+torch.cuda.is_available = lambda: False
 
 
-def test_classification_model(train_df, val_df, test_df, meta_df):
+def test_classification_model(train_df, val_df, test_df, meta_df, size=(224, 224)):
     print("Tworzenie dataloaderów...")
 
-    train_loader = create_dataloaders(train_df, batch_size=32, size=(224, 224))
-    val_loader = create_dataloaders(val_df, batch_size=32, size=(224, 224))
-
+    train_loader = create_dataloaders(train_df, batch_size=32, size=size)
+    val_loader = create_dataloaders(val_df, batch_size=32, size=size)
     print(f"Ilość batchy treningowych: {len(train_loader)}\n")
 
     print("Inicjalizacja modelu...")
     # model = TrafficSignClassifierLinearNN()
-    #model = TrafficSignClassifierConvNN()
-    model = get_resnet_model()
+    model = TrafficSignClassifierConvNN()
+    #model = get_resnet_model()
 
     print(f"Model:\n{model}\n")
 
@@ -47,7 +49,7 @@ def test_classification_model(train_df, val_df, test_df, meta_df):
         num_epochs=3,
     )
 
-    test_loader = create_dataloaders(test_df, batch_size=32, size=(224, 224))
+    test_loader = create_dataloaders(test_df, batch_size=32, size=size)
     evaluate_model(
         model=trained_model,
         test_loader=test_loader,
@@ -64,14 +66,40 @@ def main():
     print(f"Dane walidacyjne: {len(val_df)} próbek\n")
 
     print("=== klasyfikacja ===")
-    #model = test_classification_model(train_df, val_df, test_df, meta_df)
+    model = test_classification_model(train_df, val_df, test_df, meta_df, size=(32, 32))
+    yolo = load_yolo_model()
+
+    recognizer = TrafficSignRecognizer(detector=yolo, classifier=model)
+
+    img_path = os.path.join(os.getcwd(), 'image.png')
+
+    with torch.no_grad():
+        results = recognizer(img_path)
+
+    if not results:
+        print("Nie wykryto żadnych znaków.")
+    else:
+        for i, prediction in enumerate(results):
+            # prediction to tensor [1, liczba_klas]
+            
+            # 1. Wybieramy indeks klasy z najwyższym wynikiem
+            class_id = torch.argmax(prediction, dim=1).item()
+            
+            # 2. (Opcjonalnie) Obliczamy pewność w %
+            prob = torch.softmax(prediction, dim=1).max().item()
+            
+            print(f"Obiekt {i+1}:")
+            print(f"  -> Klasa ID: {class_id}")
+            print(f"  -> Pewność: {prob:.2%}")
+            print("-" * 20)
+
+
     
     print(train_df)
     ds = download_belgium_ds()
     ds = map_ppm_to_png(ds)
     df = map_to_german_standard_df(ds)
     print(df)
-
 
 if __name__ == "__main__":
     main()
