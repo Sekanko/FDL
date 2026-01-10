@@ -39,7 +39,10 @@ class SignDataset(Dataset):
             return image_tensor, target
 
         elif self.mode == "classification":
-            image = image.crop((x1, y1, x2, y2))
+            if x1 == -1:
+                pass
+            else:
+                image = image.crop((x1, y1, x2, y2))
             image_tensor = self.image_transform(image)
             label = self.labels[idx]
 

@@ -2,7 +2,7 @@ import torch
 from train_and_evaluate.train_model import train_model
 from data.gtsrb_dataset import ensure_data
 from data.SignDataset import create_dataloaders
-from data.belgium_classification_ds import download_belgium_ds
+from data.belgium_classification_ds import download_belgium_ds, map_to_german_standard_df
 from mappers.map_ppm_to_png import map_ppm_to_png
 from neural_networks_and_models.classifier_linear_nn import (
     TrafficSignClassifierLinearNN,
@@ -11,6 +11,7 @@ from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierC
 from neural_networks_and_models.resnet_model import get_resnet_model
 from train_and_evaluate.evaluate_model import evaluate_model
 from torch.nn import CrossEntropyLoss
+import os
 
 # Póki co main do testów czy wszytsko działa poprawnie
 
@@ -65,10 +66,11 @@ def main():
     print("=== klasyfikacja ===")
     #model = test_classification_model(train_df, val_df, test_df, meta_df)
     
-    print("test mappera")
+    print(train_df)
     ds = download_belgium_ds()
-    map_ppm_to_png(ds)
-
+    ds = map_ppm_to_png(ds)
+    df = map_to_german_standard_df(ds)
+    print(df)
 
 
 if __name__ == "__main__":
