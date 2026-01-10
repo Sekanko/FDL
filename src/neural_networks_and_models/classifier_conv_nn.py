@@ -19,6 +19,7 @@ class TrafficSignClassifierConvNN(nn.Module):
             nn.MaxPool2d(2, 2),
         )
         self.fc_layers = nn.Sequential(
+            nn.AdaptiveAvgPool2d((4, 4)),
             nn.Flatten(),
             nn.Linear(128 * 4 * 4, 256),
             nn.ReLU(),
