@@ -6,3 +6,4 @@ torchvision
 pillow
 timm
 ultralytics
+opencv-python
