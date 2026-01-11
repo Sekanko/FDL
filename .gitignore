@@ -41,6 +41,18 @@ dist/
 *.egg-info/
 .eggs/
 
-# YOLO model files
+# Model files
 *.pt
+*.pth
+
+# compresions
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+# other
+*.yaml
+detection_yolo/
+
 
