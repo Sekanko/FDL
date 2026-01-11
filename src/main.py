@@ -15,13 +15,14 @@ from train_and_evaluate.evaluate_model import evaluate_model
 from torch.nn import CrossEntropyLoss
 import os 
 import pandas as pd
+from mappers.map_classes import get_classes_to_names
 
 # Póki co main do testów czy wszytsko działa poprawnie
 
 # torch.cuda.is_available = lambda: False
 
 
-def test_classification_model(train_df, val_df, test_df, meta_df, size=(224, 224)):
+def test_classification_model(train_df, val_df, test_df, size=(224, 224)):
     print("Tworzenie dataloaderów...")
 
     train_loader = create_dataloaders(train_df, batch_size=32, size=size)
@@ -50,10 +51,16 @@ def test_classification_model(train_df, val_df, test_df, meta_df, size=(224, 224
     )
 
     test_loader = create_dataloaders(test_df, batch_size=32, size=size)
+
+
+    classes = get_classes_to_names()
+    class_names = [gtsrb_classes[i] for i in range(len(gtsrb_classes))]
+
     evaluate_model(
         model=trained_model,
         test_loader=test_loader,
         criterion=criterion,
+        classes=class_names,
     )
     
     return model
@@ -94,12 +101,15 @@ def main():
 
     x, y, z = german_data_as_df()
     print(x)
-    d, _, _ = polish_data_as_df()
+    d, h, u = polish_data_as_df()
     print(d)
-    f, _, _ = belgium_data_as_df()
+    f, j, i = belgium_data_as_df()
     print(f)
     merged = merge_dataframes([x, d, f])
-    print(merged)
+    merged_val = merge_dataframes([y, h, j])
+    merged_test = merge_dataframes([z, u, j])
+
+    model = test_classification_model(merged, merged_val, merged_test, size=(32,32))
 
 if __name__ == "__main__":
     main()

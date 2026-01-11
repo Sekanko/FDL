@@ -1,10 +1,14 @@
 import torch
+import matplotlib.pyplot as plt
 
 
-def train_model(model, dataloader, val_loader, criterion, optimizer, num_epochs):
+def train_model(model, dataloader, val_loader, criterion, optimizer, num_epochs, model_name="model"):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+
+    train_losses, train_accs = [], []
+    val_losses, val_accs = [], []
 
     for epoch in range(num_epochs):
         model.train()
@@ -50,12 +54,48 @@ def train_model(model, dataloader, val_loader, criterion, optimizer, num_epochs)
                 val_metrics += torch.sum(preds == labels.data)
 
         v_epoch_loss = val_loss / len(val_loader.dataset)
-
         v_epoch_score = val_metrics.double() / len(val_loader.dataset)
+
+        train_losses.append(epoch_loss)
+        train_accs.append(epoch_score.item())
+        val_losses.append(v_epoch_loss)
+        val_accs.append(v_epoch_score.item())
 
         print(f"Epoch {epoch+1}/{num_epochs}")
         print(f"Train Loss: {epoch_loss:.4f} {'Acc'}: {epoch_score:.4f}")
         print(f"Val   Loss: {v_epoch_loss:.4f} {'Acc'}: {v_epoch_score:.4f}")
         print("-" * 25)
 
+    visualize_metrics(train_losses, train_accs, val_losses, val_accs, model_name)
+
     return model
+
+
+def visualize_metrics(train_losses, train_accs, val_losses, val_accs, model_name):
+    epochs = range(1, len(train_losses) + 1)
+    
+    plt.figure(figsize=(14, 6))
+
+    # --- Wykres 1: Accuracy ---
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, train_accs, label='Training Accuracy')
+    plt.plot(epochs, val_accs, label='Validation Accuracy')
+    plt.title(f'Accuracy: {model_name}')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+
+    # --- Wykres 2: Loss ---
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, train_losses, label='Training Loss')
+    plt.plot(epochs, val_losses, label='Validation Loss')
+    plt.title(f'Loss: {model_name}')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+
+    filename = f"{model_name}_loss_acc.png"
+    plt.savefig(filename)
+    plt.close()
