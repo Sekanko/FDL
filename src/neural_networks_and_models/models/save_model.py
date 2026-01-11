@@ -7,32 +7,17 @@ from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierC
 from timm.models.resnet import ResNet
 from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
 from ultralytics import YOLO
+from neural_networks_and_models.models.save_model_struckture import ModelRegistry
 
 
-def save_model(model):
-    match model:
-        case TrafficSignClassifierLinearNN():
-            save_path = get_save_path('linear_nn_model', 'LNN_model')
-            torch.save(model.state_dict(), save_path)
-            print("Linear model saved")
-        case TrafficSignClassifierConvNN():
-            save_path = get_save_path('conv_nn_model', 'CNN_model')
-            torch.save(model.state_dict(), save_path)
-            print("Convolutional model saved")
-        case ResNet():
-            save_path = get_save_path('resnet_model', 'ResNet_model')
-            torch.save(model.state_dict(), save_path)
-            print("ResNet model saved")
-        case TrafficSignRecognizer():
-            save_path = get_save_path('recognizer_model', 'TSR_model')
-            torch.save(model.state_dict(), save_path)
-            print("Traffic Sign Recognizer model saved")
-        case YOLO():
-            save_path = get_save_path('yolo_model', 'YOLO_model', extension='pt')
-            model.save(save_path)
-            print("YOLO model saved")
-        case _:
-            raise TypeError("Unsupported model type for saving.")
+def save_model(model, registry_member: ModelRegistry):
+    info = registry_member.info
+    save_path = get_save_path(info.folder_name, info.prefix, info.extension)
+
+    if isinstance(model, YOLO):
+        model.save(save_path)
+    else:
+        torch.save(model.state_dict(), save_path)
 
 def get_save_folder_path(name):
     base_dir = os.path.dirname(__file__)
@@ -43,7 +28,7 @@ def get_save_folder_path(name):
 
     return save_model_path
 
-def get_save_path(folder_name, model_name, extension='pth'):
+def get_save_path(folder_name, model_name, extension):
     save_folder_path = get_save_folder_path(folder_name)
     model_number = 0
 
