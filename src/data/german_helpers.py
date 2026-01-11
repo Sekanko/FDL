@@ -1,17 +1,7 @@
 import os
-import kagglehub
+from .fetchers import download_german_dataset
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
-
-def download_gtsb_dataset():
-    """Pobiera dataset, jesli aktualnie nie ma go w kagglehub cache.
-    Zwraca sciezke do folderu z datasetem.
-    """
-    dataset_path = kagglehub.dataset_download(
-        "meowmeowmeowmeowmeow/gtsrb-german-traffic-sign"
-    )
-    return dataset_path
 
 
 def load_csv_files(dataset_dir):
@@ -37,25 +27,3 @@ def convert_df_img_paths_to_absolute_paths(dataset_path, df):
 
     df["Path"] = df["Path"].apply(lambda row: os.path.join(dataset_path, row))
     return df
-
-
-def ensure_data():
-    path = download_gtsb_dataset()
-    train_df, test_df, meta_df = load_csv_files(path)
-    train_df, test_df, meta_df = [
-        convert_df_img_paths_to_absolute_paths(path, df)
-        for df in [train_df, test_df, meta_df]
-    ]
-    train_split, val_split = train_test_split(
-        train_df, test_size=0.2, random_state=50, stratify=train_df["ClassId"]
-    )
-    return train_split, val_split, test_df, meta_df
-
-
-def main():
-    train, val, test, meta = ensure_data()
-    print(train.head(5))
-
-
-if __name__ == "__main__":
-    main()

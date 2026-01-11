@@ -3,12 +3,9 @@ from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecogn
 from neural_networks_and_models.yolo_model import load_yolo_model
 import torch
 from train_and_evaluate.train_model import train_model
-from data.gtsrb_dataset import ensure_data
 from data.SignDataset import create_dataloaders
-from data.belgium_classification_ds import download_belgium_ds
-from data.polish_classification_ds import download_polish_ds
-from mappers.map_ppm_to_png import map_ppm_to_png
-from mappers.map_to_german import map_dataset_to_german_standard
+from data.ensure import german_data_as_df, polish_data_as_df, belgium_data_as_df
+from data.merge import merge_dataframes
 from neural_networks_and_models.classifier_linear_nn import (
     TrafficSignClassifierLinearNN,
 )
@@ -17,11 +14,11 @@ from neural_networks_and_models.resnet_model import get_resnet_model
 from train_and_evaluate.evaluate_model import evaluate_model
 from torch.nn import CrossEntropyLoss
 import os 
-from mappers.map_classes import get_belgium_mapping, get_polish_mapping
+import pandas as pd
 
 # Póki co main do testów czy wszytsko działa poprawnie
 
-torch.cuda.is_available = lambda: False
+# torch.cuda.is_available = lambda: False
 
 
 def test_classification_model(train_df, val_df, test_df, meta_df, size=(224, 224)):
@@ -64,12 +61,10 @@ def test_classification_model(train_df, val_df, test_df, meta_df, size=(224, 224
 
 def main():
     print("=== Pobieranie danych ===")
-    train_df, val_df, test_df, meta_df = ensure_data()
-    print(f"Dane treningowe: {len(train_df)} próbek")
-    print(f"Dane walidacyjne: {len(val_df)} próbek\n")
+    # train_df, val_df, test_df, meta_df = ensure_data()
+
 
     # print("=== klasyfikacja ===")
-    # model = test_classification_model(train_df, val_df, test_df, meta_df, size=(32, 32))
     # yolo = load_yolo_model()
 
     # recognizer = TrafficSignRecognizer(detector=yolo, classifier=model)
@@ -97,16 +92,14 @@ def main():
     #         print("-" * 20)
 
 
-    
-    print(train_df)
-    ds = download_belgium_ds()
-    ds = map_ppm_to_png(ds)
-    df = map_dataset_to_german_standard(ds, get_belgium_mapping(),"Training")
-    print(df)
-    pl = download_polish_ds()
-    pldf = map_dataset_to_german_standard(pl, get_polish_mapping(), "classification")
-    print(pldf)
-
+    x, y, z = german_data_as_df()
+    print(x)
+    d, _, _ = polish_data_as_df()
+    print(d)
+    f, _, _ = belgium_data_as_df()
+    print(f)
+    merged = merge_dataframes([x, d, f])
+    print(merged)
 
 if __name__ == "__main__":
     main()
