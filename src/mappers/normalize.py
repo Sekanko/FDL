@@ -25,7 +25,7 @@ def find_target_folder(base_path, target_name):
             
     raise FileNotFoundError(f"Nie znaleziono folderu '{target_name}' wewnątrz {base_path}")
 
-def map_dataset_to_german_standard(path, mapping_dict, subset_name="Training"):
+def to_german_standard(path, mapping_dict, subset_name="Training"):
     """
     Uniwersalna funkcja mapująca dowolny dataset do formatu GTSRB.
     
