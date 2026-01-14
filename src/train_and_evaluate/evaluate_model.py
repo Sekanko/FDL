@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 def evaluate_model(model, test_loader, criterion, classes):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    model_name = model.__class__.__name__
 
     model.eval()
 
