@@ -1,6 +1,7 @@
 from sklearn.model_selection import train_test_split
 from . import fetchers
 from . import german_helpers
+from . import balance
 from mappers.normalize import to_german_standard
 from mappers import map_classes
 from mappers.img_format import map_ppm_to_png
@@ -47,6 +48,7 @@ def get_whole_data(batch_size):
         test_dfs.append(test_split)
 
     df = merge_dataframes(train_dfs)
+    df = balance.balance_dataframe(df)
     val_df = merge_dataframes(val_dfs)
     test_df = merge_dataframes(test_dfs)
 
