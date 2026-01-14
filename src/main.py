@@ -202,7 +202,7 @@ def create_model():
     while model is None:
         choice = ask_for_model()
 
-        if choice == "6":
+        if choice == "7":
             return
 
         if choice in ["1", "2", "3"]:
