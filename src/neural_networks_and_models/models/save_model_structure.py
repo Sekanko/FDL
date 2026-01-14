@@ -5,6 +5,7 @@ from enum import Enum
 from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierConvNN
 from neural_networks_and_models.classifier_linear_nn import TrafficSignClassifierLinearNN
 from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
+from torchvision.models import mobilenet_v2
 from timm.models import resnet18
 from ultralytics import YOLO
 
@@ -35,6 +36,12 @@ class ModelRegistry(Enum):
         folder_name='resnet_model',
         prefix='ResNet_model',
         extension='pth'
+    )
+    MOBILENET = ModelInfo(
+        model_class = mobilenet_v2,
+        folder_name = 'mobilenet_model',
+        prefix = 'MobileNet_model',
+        extension = 'pth'
     )
     TRAFFIC_SIGN_RECOGNIZER = ModelInfo(
         model_class=TrafficSignRecognizer,
