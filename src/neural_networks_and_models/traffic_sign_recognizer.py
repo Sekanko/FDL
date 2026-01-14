@@ -11,15 +11,13 @@ class TrafficSignRecognizer(nn.Module):
         self.classifier = classifier
         self.target_size = target_size
 
-    def forward(self, x):
-        image = cv2.imread(x)
-
+    def forward(self, image, conf=0.7, classes=None):
         detections = self.detector.predict(
             source=image,
-            conf=0.15,  # Trzeba dawać bardzo niskie. Należy wrócić do pomysłu z doszkalaniem modelu lub zmienić z YOLO
+            conf=conf,
             verbose=False,
-            device="cpu" if not torch.cuda.is_available() else "cuda",
-            classes=[495, 549],  # Kolejno klasa anku stop i znaku drogowego
+            device=next(self.parameters()).device,
+            classes=classes, 
         )
 
         results = []
