@@ -1,13 +1,8 @@
 import torch
 import os
-from neural_networks_and_models.classifier_linear_nn import (
-    TrafficSignClassifierLinearNN,
-)
-from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierConvNN
-from timm.models.resnet import ResNet
-from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
+
 from ultralytics import YOLO
-from neural_networks_and_models.models.save_model_struckture import ModelRegistry
+from src.neural_networks_and_models.models.save_model_structure import ModelRegistry
 
 
 def save_model(model, registry_member: ModelRegistry):
