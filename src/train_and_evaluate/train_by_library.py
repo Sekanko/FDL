@@ -12,6 +12,7 @@ def torch_training(model):
     epochs = 10
     lr = 0.001
     batch_size = 32
+    use_aug_choice=False
 
     print("Training Setup")
     print("Do you want to specify training inputs? (y/n)")
@@ -19,6 +20,8 @@ def torch_training(model):
         epochs = int(input(f"Number of epochs (default {epochs}): ") or epochs)
         lr = float(input(f"Learning rate (default {lr}): ") or lr)
         batch_size = int(input(f"Batch size (default {batch_size}): ") or batch_size)
+        print("Do you want to use aggressive data augmentation and oversampling? (y/n)")
+        use_aug_choice = input().lower() == "y"
 
     
     criterion = torch.nn.CrossEntropyLoss()
@@ -26,7 +29,7 @@ def torch_training(model):
 
     print(f"Starting training: {epochs} epochs, lr={lr}...")
 
-    train_loader, val_loader, _ = get_whole_data(batch_size)
+    train_loader, val_loader, _ = get_whole_data(batch_size, use_aug_choice)
 
     trained_model = train_model(
         model=model,
