@@ -1,115 +1,271 @@
 import os
-from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
-from neural_networks_and_models.yolo_model import load_yolo_model
-import torch
-from train_and_evaluate.train_model import train_model
-from data.SignDataset import create_dataloaders
-from data.ensure import german_data_as_df, polish_data_as_df, belgium_data_as_df
-from data.merge import merge_dataframes
+import time
+
+import cv2
+
+from neural_networks_and_models.models.save_model_structure import ModelRegistry
+
+from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierConvNN
 from neural_networks_and_models.classifier_linear_nn import (
     TrafficSignClassifierLinearNN,
 )
-from neural_networks_and_models.classifier_conv_nn import TrafficSignClassifierConvNN
+from neural_networks_and_models.models.load_model import load_model
+from neural_networks_and_models.models.save_model import save_model
 from neural_networks_and_models.resnet_model import get_resnet_model
-from train_and_evaluate.evaluate_model import evaluate_model
-from torch.nn import CrossEntropyLoss
-import os 
-import pandas as pd
-from mappers.map_classes import get_classes_to_names
-
-# Póki co main do testów czy wszytsko działa poprawnie
-
-# torch.cuda.is_available = lambda: False
-
-
-def test_classification_model(train_df, val_df, test_df, size=(224, 224)):
-    print("Tworzenie dataloaderów...")
-
-    train_loader = create_dataloaders(train_df, batch_size=32, size=size)
-    val_loader = create_dataloaders(val_df, batch_size=32, size=size)
-    print(f"Ilość batchy treningowych: {len(train_loader)}\n")
-
-    print("Inicjalizacja modelu...")
-    # model = TrafficSignClassifierLinearNN()
-    model = TrafficSignClassifierConvNN()
-    #model = get_resnet_model()
-
-    print(f"Model:\n{model}\n")
-
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-    print("Rozpoczęcie trenowania")
-
-    trained_model = train_model(
-        model=model,
-        val_loader=val_loader,
-        dataloader=train_loader,
-        criterion=criterion,
-        optimizer=optimizer,
-        num_epochs=3,
-    )
-
-    test_loader = create_dataloaders(test_df, batch_size=32, size=size)
+from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
+from neural_networks_and_models.yolo_model import load_yolo_model
+from train_and_evaluate.train_by_library import torch_training, YOLO_training
+from neural_networks_and_models.models.predict_by_library import (
+    torch_prediction,
+    YOLO_detection,
+    recognizer_prediction,
+)
+from train_and_evaluate.evaluate_by_library import torch_evaluation, YOLO_evaluation
 
 
-    classes = get_classes_to_names()
-    class_names = [gtsrb_classes[i] for i in range(len(gtsrb_classes))]
+def load_model_procedure():
+    print("Choose model type to load:")
+    print("1. Linear Neural Network")
+    print("2. Convolutional Neural Network")
+    print("3. ResNet Model")
+    print("4. YOLO Model")
+    print("Anything else to cancel.")
+    choice = input("Enter your choice (1/2/3/4): ")
 
-    evaluate_model(
-        model=trained_model,
-        test_loader=test_loader,
-        criterion=criterion,
-        classes=class_names,
-    )
-    
-    return model
+    print("Choose version to load (or press Enter for latest):")
+    version_input = input("Version: ")
+    version = int(version_input) if version_input else None
+
+    try:
+        match choice:
+            case "1":
+                model_registry = ModelRegistry.LINEAR
+                model = load_model(model_registry, version)
+            case "2":
+                model_registry = ModelRegistry.CONV
+                model = load_model(model_registry, version)
+            case "3":
+                model_registry = ModelRegistry.RESNET
+                model = load_model(model_registry, version)
+            case "4":
+                model_registry = ModelRegistry.YOLO
+                model = load_model(model_registry, version)
+            case "5":
+                model_registry = ModelRegistry.TRAFFIC_SIGN_RECOGNIZER
+                model = load_model(model_registry, version)
+            case _:
+                print("Loading cancelled.")
+                return None, None
+
+        return model, model_registry
+    except FileNotFoundError:
+        print("Such model does not exist.")
+        return None, None
+
+
+def load_img():
+    print("Enter relative to src/main.py path to image:")
+    path = input("Path: ").strip().replace('"', "").replace("'", "")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(script_dir, path)
+
+    img = cv2.imread(full_path)
+    if img is None:
+        print("Image not found.")
+        return None
+
+    return img
+
+
+def predictions(model, model_registry, img):
+    if model_registry == ModelRegistry.TRAFFIC_SIGN_RECOGNIZER:
+        recognizer_prediction(model, img)
+    elif model_registry == ModelRegistry.YOLO:
+        return YOLO_detection(model, img)
+    else:
+        return torch_prediction(model, model_registry, img)
+
+
+def use_model():
+    model, model_registry = load_model_procedure()
+    if model is None:
+        time.sleep(2)
+        return
+
+    manage_model_workflow(model, model_registry)
+
+
+def start_training(model, model_registry):
+    if model_registry == ModelRegistry.TRAFFIC_SIGN_RECOGNIZER:
+        print("Hybrid Model Training Menu:")
+        print("1. Train Detector (YOLO)")
+        print("2. Train Classifier (PyTorch)")
+        print("3. Train Both")
+        hybrid_choice = input("Choice: ")
+
+        if hybrid_choice in ["1", "3"]:
+            model.detector = YOLO_training(model.detector)
+
+        if hybrid_choice in ["2", "3"]:
+            model.classifier = torch_training(model.classifier)
+
+        trained_model = model
+    elif model_registry == ModelRegistry.YOLO:
+        trained_model = YOLO_training(model)
+    else:
+        trained_model = torch_training(model)
+
+    print("Training completed successfully.")
+    return trained_model
+
+
+def handle_eval(model, model_registry):
+    if model_registry == ModelRegistry.TRAFFIC_SIGN_RECOGNIZER:
+        print("Hybrid Model Evaluation Menu:")
+        print("1. Evaluate Detector (YOLO)")
+        print("2. Evaluate Classifier (PyTorch)")
+        print("3. Evaluate Both")
+        hybrid_choice = input("Choice: ")
+
+        if hybrid_choice in ["1", "3"]:
+            YOLO_evaluation(model.detector)
+
+        if hybrid_choice in ["2", "3"]:
+            torch_evaluation(model.classifier)
+
+    elif model_registry == ModelRegistry.YOLO:
+        YOLO_evaluation(model)
+
+    else:
+        torch_evaluation(model)
+
+    print("Evaluation completed successfully.")
+
+
+def manage_model_workflow(model, model_registry):
+    while True:
+        print(f"\n--- Model Management: {model_registry.name} ---")
+        print("1. Train")
+        print("2. Evaluate")
+        print("3. Use")
+        print("4. Save")
+        print("5. Back to menu")
+        choice = input("Enter choice (1-5): ")
+
+        match choice:
+            case "1":
+                model = start_training(model, model_registry)
+            case "2":
+                handle_eval(model, model_registry)
+            case "3":
+                img = load_img()
+                if img is not None:
+                    predictions(model, model_registry, img)
+            case "4":
+                save_model(model, model_registry)
+                time.sleep(1)
+            case "5":
+                break
+
+
+def ask_for_model(recognizer_included=True):
+    print("\n--- Model Creation Menu ---")
+    print("1. Linear Neural Network")
+    print("2. Convolutional Neural Network")
+    print("3. ResNet Model")
+
+    if not recognizer_included:
+        return input("Enter your choice (1-3): ")
+
+    print("4. YOLO Model")
+    print("5. Traffic Sign Recognizer (YOLO + Classifier)")
+    print("6. Back to main menu")
+    return input("Enter your choice (1-6): ")
+
+
+def create_classifier_instance(choice):
+    match choice:
+        case "1":
+            return TrafficSignClassifierLinearNN(), ModelRegistry.LINEAR
+        case "2":
+            return TrafficSignClassifierConvNN(), ModelRegistry.CONV
+        case "3":
+            return get_resnet_model(), ModelRegistry.RESNET
+        case _:
+            return None, None
+
+
+def create_model():
+    model = None
+    model_registry = None
+
+    while model is None:
+        choice = ask_for_model()
+
+        if choice == "6":
+            return
+
+        if choice in ["1", "2", "3"]:
+            model, model_registry = create_classifier_instance(choice)
+
+        elif choice == "4":
+            print("Creating YOLO Model...")
+            model = load_yolo_model()
+            model_registry = ModelRegistry.YOLO
+
+        elif choice == "5":
+            print("Creating Traffic Sign Recognizer (Hybrid System)...")
+            detector = load_yolo_model()
+
+            classifier = None
+            while classifier is None:
+                print("\nSelect classifier for the Hybrid System:")
+                sub_choice = ask_for_model(recognizer_included=False)
+                classifier, _ = create_classifier_instance(sub_choice)
+                if classifier is None:
+                    print("Please select a correct option (1-3).")
+                    time.sleep(1)
+
+            model = TrafficSignRecognizer(detector, classifier)
+            model_registry = ModelRegistry.TRAFFIC_SIGN_RECOGNIZER
+
+        else:
+            print("Invalid choice. Please try again.")
+
+    manage_model_workflow(model, model_registry)
+
+
+def starting_app():
+    print("Starting the application...")
+    print("Should program use GPU if available? (y/n): ")
+    gpu_choice = input().lower()
+
+    if gpu_choice == "n":
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 
 def main():
-    print("=== Pobieranie danych ===")
-    # train_df, val_df, test_df, meta_df = ensure_data()
+    starting_app()
 
+    while True:
+        print("Select an option:")
+        print("1. Create model")
+        print("2. Load model")
+        print("3. Exit")
+        choice = input("Enter your choice (1/2/3): ")
 
-    # print("=== klasyfikacja ===")
-    # yolo = load_yolo_model()
+        match choice:
+            case "1":
+                create_model()
+            case "2":
+                print("Use an existing model...")
+                use_model()
+            case "3":
+                print("Exiting the program.")
+                break
+            case _:
+                print("Invalid choice. Please try again.")
 
-    # recognizer = TrafficSignRecognizer(detector=yolo, classifier=model)
-
-    # img_path = os.path.join(os.getcwd(), 'image.png')
-
-    # with torch.no_grad():
-    #     results = recognizer(img_path)
-
-    # if not results:
-    #     print("Nie wykryto żadnych znaków.")
-    # else:
-    #     for i, prediction in enumerate(results):
-    #         # prediction to tensor [1, liczba_klas]
-            
-    #         # 1. Wybieramy indeks klasy z najwyższym wynikiem
-    #         class_id = torch.argmax(prediction, dim=1).item()
-            
-    #         # 2. (Opcjonalnie) Obliczamy pewność w %
-    #         prob = torch.softmax(prediction, dim=1).max().item()
-            
-    #         print(f"Obiekt {i+1}:")
-    #         print(f"  -> Klasa ID: {class_id}")
-    #         print(f"  -> Pewność: {prob:.2%}")
-    #         print("-" * 20)
-
-
-    x, y, z = german_data_as_df()
-    print(x)
-    d, h, u = polish_data_as_df()
-    print(d)
-    f, j, i = belgium_data_as_df()
-    print(f)
-    merged = merge_dataframes([x, d, f])
-    merged_val = merge_dataframes([y, h, j])
-    merged_test = merge_dataframes([z, u, j])
-
-    model = test_classification_model(merged, merged_val, merged_test, size=(32,32))
 
 if __name__ == "__main__":
     main()

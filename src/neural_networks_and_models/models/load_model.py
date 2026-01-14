@@ -23,8 +23,9 @@ def load_model(model_registry: ModelRegistry, version=None):
         model = YOLO(model_path)
     else:
         model = model_info.model_class()
-        model.load_state_dict(torch.load(model_path))
-        model = torch.load(model_path)
+        state_dict = torch.load(model_path)
+        model.load_state_dict(state_dict)
+        model.eval()
 
     return model
 
