@@ -30,7 +30,11 @@ class TrafficSignRecognizer(nn.Module):
                     next(self.classifier.parameters()).device
                 )
 
-                prediction = self.classifier(crop_batch)
+                self.classifier.eval() 
+                with torch.no_grad():
+                    logits = self.classifier(crop_batch)
+                    prediction = torch.argmax(logits, dim=1).item()
+                
                 results.append(prediction)
 
         return results
