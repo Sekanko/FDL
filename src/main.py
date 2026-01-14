@@ -12,6 +12,7 @@ from neural_networks_and_models.classifier_linear_nn import (
 from neural_networks_and_models.models.load_model import load_model
 from neural_networks_and_models.models.save_model import save_model
 from neural_networks_and_models.resnet_model import get_resnet_model
+from neural_networks_and_models.mobilenet_model import get_mobilenet_model
 from neural_networks_and_models.traffic_sign_recognizer import TrafficSignRecognizer
 from neural_networks_and_models.yolo_model import load_yolo_model
 from train_and_evaluate.train_by_library import torch_training, YOLO_training
@@ -27,10 +28,11 @@ def load_model_procedure():
     print("Choose model type to load:")
     print("1. Linear Neural Network")
     print("2. Convolutional Neural Network")
-    print("3. ResNet Model")
-    print("4. YOLO Model")
+    print("3. MobileNet Model")
+    print("4. ResNet Model")
+    print("5. YOLO Model")
     print("Anything else to cancel.")
-    choice = input("Enter your choice (1/2/3/4): ")
+    choice = input("Enter your choice (1/2/3/4/5): ")
 
     print("Choose version to load (or press Enter for latest):")
     version_input = input("Version: ")
@@ -48,9 +50,12 @@ def load_model_procedure():
                 model_registry = ModelRegistry.RESNET
                 model = load_model(model_registry, version)
             case "4":
-                model_registry = ModelRegistry.YOLO
+                model_registry = ModelRegistry.MOBILENET
                 model = load_model(model_registry, version)
             case "5":
+                model_registry = ModelRegistry.YOLO
+                model = load_model(model_registry, version)
+            case "6":
                 model_registry = ModelRegistry.TRAFFIC_SIGN_RECOGNIZER
                 model = load_model(model_registry, version)
             case _:
@@ -172,14 +177,15 @@ def ask_for_model(recognizer_included=True):
     print("\n--- Model Creation Menu ---")
     print("1. Linear Neural Network")
     print("2. Convolutional Neural Network")
-    print("3. ResNet Model")
+    print("3. MobileNet Model")
+    print("4. ResNet Model")
 
     if not recognizer_included:
-        return input("Enter your choice (1-3): ")
+        return input("Enter your choice (1-4): ")
 
-    print("4. YOLO Model")
-    print("5. Traffic Sign Recognizer (YOLO + Classifier)")
-    print("6. Back to main menu")
+    print("5. YOLO Model")
+    print("6. Traffic Sign Recognizer (YOLO + Classifier)")
+    print("7. Back to main menu")
     return input("Enter your choice (1-6): ")
 
 
@@ -190,6 +196,8 @@ def create_classifier_instance(choice):
         case "2":
             return TrafficSignClassifierConvNN(), ModelRegistry.CONV
         case "3":
+            return get_mobilenet_model(), ModelRegistry.MOBILENET
+        case "4":
             return get_resnet_model(), ModelRegistry.RESNET
         case _:
             return None, None
@@ -205,15 +213,15 @@ def create_model():
         if choice == "6":
             return
 
-        if choice in ["1", "2", "3"]:
+        if choice in ["1", "2", "3", "4"]:
             model, model_registry = create_classifier_instance(choice)
 
-        elif choice == "4":
+        elif choice == "5":
             print("Creating YOLO Model...")
             model = load_yolo_model()
             model_registry = ModelRegistry.YOLO
 
-        elif choice == "5":
+        elif choice == "6":
             print("Creating Traffic Sign Recognizer (Hybrid System)...")
             detector = load_yolo_model()
 
