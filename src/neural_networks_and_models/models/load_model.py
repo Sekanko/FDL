@@ -3,7 +3,7 @@ import os
 from ultralytics import YOLO
 import re
 
-import neural_networks_and_models.models.save_model_struckture as ModelRegistry
+from neural_networks_and_models.models.save_model_structure import ModelRegistry
 
 def load_model(model_registry: ModelRegistry, version=None):
     model_info = model_registry.info
