@@ -1,6 +1,6 @@
 # Detekcja i klasyfikacja znaków drogowych
 Pojekt przygotowywany w ramach przedmiotu FDL (Future of Deep Learning)
-## 📌 O projekcie
+## O projekcie
 
 Celem projektu jest stworzenie modelu, który potrafi poprawnie zaklasyfikować zdjęcie znaku drogowego do jednej z 43 kategorii (zgodnych ze standardem GTSRB). Projekt bada wpływ łączenia różnych zbiorów danych oraz porównuje skuteczność własnych architektur CNN z gotowymi, bardziej zaawansowanymi rozwiązaniami.
 
