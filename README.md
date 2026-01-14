@@ -12,5 +12,15 @@ Celem projektu jest stworzenie modelu, który potrafi poprawnie zaklasyfikować 
     * MobileNetV2 (Transfer Learning) (OPISAC).
 * **Wizualizacja:** Automatyczne generowanie wykresów uczenia (Loss/Accuracy) oraz macierzy pomyłek (Confusion Matrix).
 * **Ewaluacja:** Szczegółowe raporty klasyfikacji (Precision, Recall, F1-Score).
-
-* URUCHOMIENIE ITP DODAC OKOK
+* 
+## Uruchamianie
+1. Upewnij się, że masz pobranego [pythona](https://www.python.org/downloads/) (wersja 3.10+)
+2. Sklonuj repozytorium za pomocą `git clone git@github.com:Sekanko/FDL.git`
+3. W konsoli przjedź do folderu z programem `cd fdl`
+4. Przygotuj środowisko python:
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+5. Po zakończeczniu instalacji wykonaj komendę `python src/main.py` i podążaj za instrukcjami w programie
