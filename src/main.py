@@ -47,10 +47,10 @@ def load_model_procedure():
                 model_registry = ModelRegistry.CONV
                 model = load_model(model_registry, version)
             case "3":
-                model_registry = ModelRegistry.RESNET
+                model_registry = ModelRegistry.MOBILENET
                 model = load_model(model_registry, version)
             case "4":
-                model_registry = ModelRegistry.MOBILENET
+                model_registry = ModelRegistry.RESNET
                 model = load_model(model_registry, version)
             case "5":
                 model_registry = ModelRegistry.YOLO
@@ -63,8 +63,8 @@ def load_model_procedure():
                 return None, None
 
         return model, model_registry
-    except FileNotFoundError:
-        print("Such model does not exist.")
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
         return None, None
 
 
