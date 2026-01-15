@@ -34,7 +34,7 @@ def load_model_procedure():
     print("Anything else to cancel.")
     choice = input("Enter your choice (1/2/3/4/5): ")
 
-    print("Choose version to load (or press Enter for latest):")
+    print("Choose version to load (or press Enter or latest):")
     version_input = input("Version: ")
     version = int(version_input) if version_input else None
 
