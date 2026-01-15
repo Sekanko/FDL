@@ -1,15 +1,15 @@
 import torch
 import torch.nn as nn
-from mappers.map_yolo_to_classifire import map_yolo_to_classifier
-import cv2
+from mappers.map_yolo_to_classifier import map_yolo_to_classifier
+from torchvision.models import MobileNetV2
 
 
 class TrafficSignRecognizer(nn.Module):
-    def __init__(self, detector, classifier, target_size=(32, 32)):
+    def __init__(self, detector, classifier):
         super(TrafficSignRecognizer, self).__init__()
         self.detector = detector
         self.classifier = classifier
-        self.target_size = target_size
+        self.target_size =  (224, 224) if isinstance(self.classifier, MobileNetV2) else (32, 32)
 
     def forward(self, image, conf=0.7, classes=None):
         detections = self.detector.predict(

@@ -36,7 +36,7 @@ def belgium_data_as_df():
     return train_split, val_split, test_df
 
 
-def get_whole_data(batch_size, use_aug=False):
+def get_whole_data(batch_size, use_aug=False, size=(32, 32)):
     train_dfs = []
     val_dfs = []
     test_dfs = []
@@ -52,8 +52,8 @@ def get_whole_data(batch_size, use_aug=False):
     val_df = merge_dataframes(val_dfs)
     test_df = merge_dataframes(test_dfs)
 
-    train_loader = create_dataloaders(df, batch_size=batch_size, use_aug=use_aug)
-    val_loader = create_dataloaders(val_df, batch_size=batch_size, use_aug=use_aug)
-    test_loader = create_dataloaders(test_df, batch_size=batch_size,  use_aug=use_aug)
+    train_loader = create_dataloaders(df, batch_size=batch_size, use_aug=use_aug, size=size)
+    val_loader = create_dataloaders(val_df, batch_size=batch_size, use_aug=use_aug, size=size)
+    test_loader = create_dataloaders(test_df, batch_size=batch_size,  use_aug=use_aug, size=size)
 
     return train_loader, val_loader, test_loader

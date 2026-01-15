@@ -1,7 +1,7 @@
-
 import torch
 import os
 
+from torchvision.models import MobileNetV2
 from train_and_evaluate.train_model import train_model
 from train_and_evaluate.train_yolo import train_yolo_model
 from data.prepare_yolo_data import prepare_yolo_dataset
@@ -12,8 +12,12 @@ def torch_training(model):
     epochs = 10
     lr = 0.001
     batch_size = 32
-    use_aug_choice=False
+    use_aug_choice = False
     l2 = 1e-4
+    img_size = (32, 32)
+
+    if isinstance(model, MobileNetV2):
+        img_size = (224, 224)
 
     print("Training Setup")
     print("Do you want to specify training inputs? (y/n)")
@@ -22,7 +26,7 @@ def torch_training(model):
         lr = float(input(f"Learning rate (default {lr}): ") or lr)
         batch_size = int(input(f"Batch size (default {batch_size}): ") or batch_size)
         l2 = float(input(f"L2 rate (default {l2}): ") or l2)
-        print("Do you want to use aggressive data augmentation and oversampling? (y/n)")
+        print("Do you want to use data augmentation? (y/n)")
         use_aug_choice = input().lower() == "y"
 
     
@@ -31,7 +35,7 @@ def torch_training(model):
 
     print(f"Starting training: {epochs} epochs, lr={lr}...")
 
-    train_loader, val_loader, _ = get_whole_data(batch_size, use_aug_choice)
+    train_loader, val_loader, _ = get_whole_data(batch_size, use_aug_choice, img_size)
 
     trained_model = train_model(
         model=model,
@@ -43,6 +47,7 @@ def torch_training(model):
     )
 
     return trained_model
+
 
 def YOLO_training(model):
     print("Training Setup for YOLO")

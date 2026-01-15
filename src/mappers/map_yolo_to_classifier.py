@@ -2,7 +2,7 @@ import cv2
 from torchvision import transforms
 
 
-def map_yolo_to_classifier(result, photo, target_size=(224, 224)):
+def map_yolo_to_classifier(result, photo, target_size=(32, 32)):
     image_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize(target_size), 
