@@ -7,12 +7,12 @@ Celem projektu jest stworzenie modelu, który potrafi poprawnie zaklasyfikować 
 ### Główne funkcjonalności:
 * **Integracja danych:** Pobieranie, pre-processing i opcjonalne łączenie zbiorów danych z Niemiec (GTSRB), Polski i Belgii.
 * **Architektury:** Implementacja i porównanie kilku modeli:
-    * Prosta sieć liniowa (OPISAC).
-    * Własna Konwolucyjna Sieć Neuronowa (OPISAC).
-    * MobileNetV2 (Transfer Learning) (OPISAC).
+    * Prosta sieć liniowa.
+    * Własna Konwolucyjna Sieć Neuronowa.
+    * MobileNetV2 (Fine Tuning).
 * **Wizualizacja:** Automatyczne generowanie wykresów uczenia (Loss/Accuracy) oraz macierzy pomyłek (Confusion Matrix).
 * **Ewaluacja:** Szczegółowe raporty klasyfikacji (Precision, Recall, F1-Score).
-* 
+  
 ## Uruchamianie
 1. Upewnij się, że masz pobranego [pythona](https://www.python.org/downloads/) (wersja 3.10+)
 2. Sklonuj repozytorium za pomocą `git clone git@github.com:Sekanko/FDL.git`
