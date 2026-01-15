@@ -21,7 +21,7 @@ def torch_training(model):
         epochs = int(input(f"Number of epochs (default {epochs}): ") or epochs)
         lr = float(input(f"Learning rate (default {lr}): ") or lr)
         batch_size = int(input(f"Batch size (default {batch_size}): ") or batch_size)
-        l2 = float(input(f"L2 rate (default {l2}): "))
+        l2 = float(input(f"L2 rate (default {l2}): ") or l2)
         print("Do you want to use aggressive data augmentation and oversampling? (y/n)")
         use_aug_choice = input().lower() == "y"
 
