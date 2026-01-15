@@ -23,6 +23,13 @@ from neural_networks_and_models.models.predict_by_library import (
 )
 from train_and_evaluate.evaluate_by_library import torch_evaluation, YOLO_evaluation
 
+def ask_for_version():
+    print("Choose version to load (or press Enter for latest):")
+    version_input = input("Version: ")
+    version = int(version_input) if version_input else None
+
+    return version
+
 
 def load_model_procedure():
     print("Choose model type to load:")
@@ -33,10 +40,7 @@ def load_model_procedure():
     print("5. YOLO Model")
     print("Anything else to cancel.")
     choice = input("Enter your choice (1/2/3/4/5): ")
-
-    print("Choose version to load (or press Enter for latest):")
-    version_input = input("Version: ")
-    version = int(version_input) if version_input else None
+    version = ask_for_version()
 
     try:
         match choice:
@@ -68,9 +72,7 @@ def load_model_procedure():
         return None, None
 
 
-def load_img():
-    print("Enter relative to src/main.py path to image:")
-    path = input("Path: ").strip().replace('"', "").replace("'", "")
+def load_img(path):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     full_path = os.path.join(script_dir, path)
 
@@ -163,9 +165,17 @@ def manage_model_workflow(model, model_registry):
             case "2":
                 handle_eval(model, model_registry)
             case "3":
-                img = load_img()
+                print("Enter relative to src/main.py path to image:")
+                img_path = input("src/")
+                start_time = time.perf_counter()
+                img = load_img(img_path)
+
                 if img is not None:
                     predictions(model, model_registry, img)
+                    end_time = time.perf_counter()
+                    print(f"Predicted in {end_time - start_time:.2f} seconds.")
+
+
             case "4":
                 save_model(model, model_registry)
                 time.sleep(1)
@@ -223,19 +233,34 @@ def create_model():
 
         elif choice == "6":
             print("Creating Traffic Sign Recognizer (Hybrid System)...")
-            detector = load_yolo_model()
+            print("Do you want to create new YOLO model? (y/n): ")
+
+            if input().lower() == "y":
+                detector = load_yolo_model()
+            else:
+                version = ask_for_version()
+                detector = load_model(ModelRegistry.YOLO, version)
 
             classifier = None
-            while classifier is None:
-                print("\nSelect classifier for the Hybrid System:")
-                sub_choice = ask_for_model(recognizer_included=False)
-                classifier, _ = create_classifier_instance(sub_choice)
-                if classifier is None:
-                    print("Please select a correct option (1-3).")
-                    time.sleep(1)
+
+            print("\nSelect classifier for the Hybrid System:")
+            sub_choice = ask_for_model(recognizer_included=False)
+
+            classifier, classifier_registry = create_classifier_instance(sub_choice)
+
+            print(f"Do you want to load existing {classifier_registry.name}? (y/n):")
+            want_to_load = input().lower()
+
+            if want_to_load == "y":
+                version = ask_for_version()
+                classifier = load_model(classifier_registry, version)
+
 
             model = TrafficSignRecognizer(detector, classifier)
             model_registry = ModelRegistry.TRAFFIC_SIGN_RECOGNIZER
+
+            if detector is None or classifier is None:
+                return
 
         else:
             print("Invalid choice. Please try again.")
