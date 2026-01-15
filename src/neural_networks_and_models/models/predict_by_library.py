@@ -2,16 +2,25 @@ import cv2
 import torch
 import torchvision.transforms as T
 from mappers.map_classes import get_classes_to_names
+from neural_networks_and_models.classifier_linear_nn import TrafficSignClassifierLinearNN
+
+from neural_networks_and_models.models.save_model_structure import ModelRegistry
+from torchvision.models import MobileNetV2
 
 
 def torch_prediction(model, model_registry, img, display=True):
     print(f"Processing with PyTorch Model ({model_registry.name})")
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    img_size = (32, 32)
+
+    if isinstance(model, MobileNetV2):
+        img_size = (224, 224)
+
     preprocess = T.Compose(
         [
             T.ToPILImage(),
-            T.Resize((32, 32)),
+            T.Resize(img_size),
             T.ToTensor(),
         ]
     )
